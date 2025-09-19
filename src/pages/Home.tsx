@@ -1,45 +1,62 @@
-import { Box, Button, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box, Button, Typography, IconButton } from '@mui/material'
+import { GitHub, LinkedIn, Description } from '@mui/icons-material'
+import { useState, useCallback } from 'react'
 import AnimatedBackground from '../components/AnimatedBackground'
+import ContactOverlay from '../components/ContactOverlay'
+import LoadingScreen from '../components/LoadingScreen'
 import { useNavigate } from 'react-router-dom'
 
 const Home = () => {
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false)
   const [elementsHidden, setElementsHidden] = useState(false)
+  const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
+  const [imagesLoaded, setImagesLoaded] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate();
 
-  const handleAnimationStart = () => {
+  const handleAnimationStart = useCallback(() => {
     setIsAnimationPlaying(true)
     setElementsHidden(true) // Hide elements permanently when animation starts
-  }
+  }, [])
 
-  const handleNavigation = (key: string) => {
+  const handleImagesLoaded = useCallback(() => {
+    setImagesLoaded(true)
+    // Add a small delay to ensure smooth transition from loading screen
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 500)
+  }, [])
+
+  const handleNavigation = useCallback((key: string) => {
     switch (key) {
       case 'home':
         window.location.reload()
         break;  
       case 'projects':
-        handleAnimationStart()
-        break;
-      case 'info':
-        navigate('/info')
+        // Only allow navigation if images are loaded
+        if (imagesLoaded) {
+          handleAnimationStart()
+        }
         break;
       case 'contact':
-        navigate('/contact')
+        setContactOverlayOpen(true)
         break;
       default:
         break;
     }
-  }
+  }, [handleAnimationStart, imagesLoaded])
 
-
-  const handleAnimationEnd = () => {
+  const handleAnimationEnd = useCallback(() => {
     // Animation reached the last frame and stopped
     console.log('Animation completed - reached last frame')
     setIsAnimationPlaying(false)
     // Navigate to projects page after animation completes
     navigate('/projects')
-  }
+  }, [navigate])
+
+  const handleCloseContactOverlay = useCallback(() => {
+    setContactOverlayOpen(false)
+  }, [])
 
   return (
     <Box
@@ -67,7 +84,7 @@ const Home = () => {
           transition: 'opacity 1.2s ease-in-out',
         }}
       >
-        {['HOME', 'PROJECTS', 'INFO', 'CONTACT'].map((item) => (
+        {['HOME', 'PROJECTS',  'CONTACT'].map((item) => (
           <Typography
             key={item}
             onClick={() => handleNavigation(item.toLowerCase())}
@@ -102,7 +119,7 @@ const Home = () => {
       >
         <Typography
           sx={{
-            fontSize: { xs: '3rem', sm: '4rem', md: '6.5rem' },
+            fontSize: { xs: '3rem', sm: '4rem', md: '8rem' },
             padding: 0,
             lineHeight: 0.9,
             color: '#fff',
@@ -113,7 +130,7 @@ const Home = () => {
         </Typography>
         <Typography
           sx={{
-            fontSize: { xs: '3rem', sm: '4rem', md: '6.5rem' },
+            fontSize: { xs: '3rem', sm: '4rem', md: '8rem' },
             lineHeight: 0.9,
             color: '#fff',
            
@@ -134,6 +151,138 @@ const Home = () => {
         </Typography>
       </Box>
 
+      {/* Social Media Icons - Bottom Left (Desktop Only) */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: { xs: '1rem', sm: '2rem' },
+          left: { xs: '1rem', sm: '2rem' },
+          zIndex: 10,
+          opacity: elementsHidden ? 0 : 1,
+          transition: 'opacity 1.2s ease-in-out',
+          display: { xs: 'none', md: 'block' },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: { xs: 'center', sm: 'flex-start' },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="https://github.com/McDiamund"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <GitHub fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              GitHub
+            </Typography>
+          </Box>
+          
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="https://www.linkedin.com/in/elias-treadway-41293b1b5/"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <LinkedIn fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              LinkedIn
+            </Typography>
+          </Box>
+          
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <Description fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              Resume
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
       {/* Bottom Right Content */}
       <Box
         sx={{
@@ -148,6 +297,127 @@ const Home = () => {
           transition: 'opacity 1.2s ease-in-out',
         }}
       >
+        {/* Social Media Icons - Mobile/Tablet Only */}
+        <Box
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="https://github.com/McDiamund"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <GitHub fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              GitHub
+            </Typography>
+          </Box>
+          
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="https://www.linkedin.com/in/elias-treadway-41293b1b5/"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <LinkedIn fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              LinkedIn
+            </Typography>
+          </Box>
+          
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <IconButton
+              component="a"
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: '#e0e0e0',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  color: '#a4b649',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
+              <Description fontSize="large" />
+            </IconButton>
+            <Typography
+              sx={{
+                fontSize: '0.65rem',
+                color: '#e0e0e0',
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+              }}
+            >
+              Resume
+            </Typography>
+          </Box>
+        </Box>
+        
         <Typography
           sx={{
             fontSize: { sm: '1.2rem' },
@@ -163,6 +433,7 @@ const Home = () => {
         
         <Button
           variant="contained"
+          onClick={() => setContactOverlayOpen(true)}
           sx={{
             backgroundColor: '#a4b649',
             color: '#000',
@@ -189,6 +460,14 @@ const Home = () => {
         isPlaying={isAnimationPlaying}
         onAnimationStart={() => console.log('Animation started')}
         onAnimationEnd={handleAnimationEnd}
+        onImagesLoaded={handleImagesLoaded}
+      />
+
+      <LoadingScreen isVisible={isLoading} />
+
+      <ContactOverlay 
+        open={contactOverlayOpen}
+        onClose={handleCloseContactOverlay}
       />
     </Box>
   )

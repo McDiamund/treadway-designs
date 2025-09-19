@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { Box } from '@mui/material'
 
 interface AnimatedBackgroundProps {
   isPlaying?: boolean
   onAnimationStart?: () => void
   onAnimationEnd?: () => void
+  onImagesLoaded?: () => void
 }
 
 const AnimatedBackground = ({ 
   isPlaying = false, 
   onAnimationStart, 
-  onAnimationEnd 
+  onAnimationEnd,
+  onImagesLoaded
 }: AnimatedBackgroundProps) => {
   const [currentFrame, setCurrentFrame] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -21,44 +23,62 @@ const AnimatedBackground = ({
   const imageCount = 20 // 0000.jpg to 0019.jpg
   const frameDuration = 1000 / 18 // 24fps = ~41.67ms per frame
 
-  // Preload all images
+  // Preload all images more robustly
   useEffect(() => {
     const loadImages = async () => {
       const imagePaths: string[] = []
-      const loadPromises: Promise<void>[] = []
+      
+      try {
+        // First, get all image paths
+        for (let i = 0; i < imageCount; i++) {
+          const imageNumber = i.toString().padStart(4, '0')
+          try {
+            const imageModule = await import(`../assets/images/animated-background/${imageNumber}.jpg`)
+            imagePaths.push(imageModule.default)
+          } catch (error) {
+            console.error(`Error importing image ${imageNumber}.jpg:`, error)
+          }
+        }
 
-      for (let i = 0; i < imageCount; i++) {
-        const imageNumber = i.toString().padStart(4, '0')
-        try {
-          // Use dynamic import for Vite
-          const imageModule = await import(`../assets/images/animated-background/${imageNumber}.jpg`)
-          const imagePath = imageModule.default
-          imagePaths.push(imagePath)
-
-          // Preload each image
-          const loadPromise = new Promise<void>((resolve) => {
+        // Then preload all images and ensure they're in browser cache
+        const loadPromises = imagePaths.map((imagePath, index) => {
+          return new Promise<void>((resolve, reject) => {
             const img = new Image()
-            img.onload = () => resolve()
-            img.onerror = () => resolve() // Continue even if image fails to load
+            
+            img.onload = () => {
+              console.log(`Image ${index} loaded successfully`)
+              resolve()
+            }
+            
+            img.onerror = (error) => {
+              console.error(`Error loading image ${index}:`, error)
+              reject(error)
+            }
+            
+            // Important: Set src after setting up event listeners
             img.src = imagePath
           })
-          loadPromises.push(loadPromise)
-        } catch (error) {
-          console.error(`Error loading image ${imageNumber}.jpg:`, error)
-        }
-      }
+        })
 
-      try {
         await Promise.all(loadPromises)
+        
         setImages(imagePaths)
         setIsLoaded(true)
+        
+        console.log('All images successfully preloaded')
+        onImagesLoaded?.()
+        
       } catch (error) {
-        console.error('Error loading images:', error)
+        console.error('Error in image loading process:', error)
+        // Even if some images fail, we'll try to proceed
+        setImages(imagePaths)
+        setIsLoaded(true)
+        onImagesLoaded?.()
       }
     }
 
     loadImages()
-  }, [imageCount])
+  }, [imageCount, onImagesLoaded])
 
   // Animation logic
   useEffect(() => {
@@ -129,4 +149,4 @@ const AnimatedBackground = ({
   )
 }
 
-export default AnimatedBackground
+export default memo(AnimatedBackground)

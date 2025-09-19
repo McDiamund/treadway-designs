@@ -1,20 +1,37 @@
 import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import ContactOverlay from '../components/ContactOverlay'
 import slogo from '../assets/images/slogo-transparent-white.png'
+import elysianImg from '../assets/images/elysian.png'
+import productivecloudsImg from '../assets/images/productiveclouds.png'
+import superioradvantagereImg from '../assets/images/superioradvantage-re.co_.png'
+import noteImg from '../assets/images/note.jpg'
 
 const Projects = () => {
   const navigate = useNavigate()
   const [backgroundImage, setBackgroundImage] = useState<string>('')
+  const [defaultBackgroundImage, setDefaultBackgroundImage] = useState<string>('')
   const [headerAnimated, setHeaderAnimated] = useState<boolean>(false)
   const [mainContentAnimated, setMainContentAnimated] = useState<boolean>(false)
   const [contentVisible, setContentVisible] = useState<boolean>(false)
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null)
+  const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
 
-  // Load the final frame image (0019.jpg)
+  // Project image mapping
+  const projectImages = {
+    'productive-clouds': productivecloudsImg,
+    'note': noteImg,
+    'elysian': elysianImg,
+    'superior-advantage': superioradvantagereImg,
+  }
+
+  // Load the final frame image (0019.jpg) as default
   useEffect(() => {
     const loadBackgroundImage = async () => {
       try {
         const imageModule = await import('../assets/images/animated-background/0019.jpg')
+        setDefaultBackgroundImage(imageModule.default)
         setBackgroundImage(imageModule.default)
       } catch (error) {
         console.error('Error loading background image:', error)
@@ -24,11 +41,20 @@ const Projects = () => {
     loadBackgroundImage()
   }, [])
 
+  // Handle hover background changes
+  useEffect(() => {
+    if (hoveredProject && projectImages[hoveredProject as keyof typeof projectImages]) {
+      setBackgroundImage(projectImages[hoveredProject as keyof typeof projectImages])
+    } else {
+      setBackgroundImage(defaultBackgroundImage)
+    }
+  }, [hoveredProject, defaultBackgroundImage])
+
   // Trigger header animation on page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setHeaderAnimated(true)
-    }, 500) // Small delay to ensure smooth animation
+    }, 400) // Small delay to ensure smooth animation
 
     return () => clearTimeout(timer)
   }, [])
@@ -37,7 +63,7 @@ const Projects = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMainContentAnimated(true)
-    }, 1200) // Start after header animation completes (1000ms + 600ms + 100ms buffer)
+    }, 800) // Start after header animation completes (1000ms + 600ms + 100ms buffer)
 
     return () => clearTimeout(timer)
   }, [])
@@ -51,7 +77,7 @@ const Projects = () => {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleNavigation = (key: string) => {
+  const handleNavigation = useCallback((key: string) => {
     switch (key) {
       case 'home':
         navigate('/')
@@ -59,16 +85,17 @@ const Projects = () => {
       case 'projects':
         // Already on projects page
         break
-      case 'info':
-        navigate('/info')
-        break
       case 'contact':
-        navigate('/contact')
+        setContactOverlayOpen(true)
         break
       default:
         break
     }
-  }
+  }, [navigate])
+
+  const handleCloseContactOverlay = useCallback(() => {
+    setContactOverlayOpen(false)
+  }, [])
 
   return (
     <Box
@@ -102,8 +129,20 @@ const Projects = () => {
       {/* Navigation Header */}
       <Box
         sx={{
-          margin: '20px 20px 0 20px',
-          padding: headerAnimated ? '20px' : '0 20px',
+          margin: { 
+            xs: '10px 10px 0 10px', 
+            sm: '15px 15px 0 15px', 
+            md: '20px 20px 0 20px' 
+          },
+          padding: headerAnimated ? { 
+            xs: '15px', 
+            sm: '18px', 
+            md: '20px' 
+          } : { 
+            xs: '0 15px', 
+            sm: '0 18px', 
+            md: '0 20px' 
+          },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'flex-end',
@@ -115,7 +154,6 @@ const Projects = () => {
       >
         <Box 
           sx={{ 
-            flex: 1,
             opacity: contentVisible ? 1 : 0,
             transform: contentVisible ? 'translateY(0)' : 'translateY(-10px)',
             transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
@@ -123,22 +161,28 @@ const Projects = () => {
           onClick={() => handleNavigation('home')}
           style={{ cursor: 'pointer' }}
           >
-          <img
+          <Box
+            component="img"
             src={slogo}
             alt="Logo"
-            style={{ height: 40, width: 'auto', display: 'block' }}
+            sx={{ 
+              height: { xs: 32, sm: 36, md: 40 }, 
+              width: 'auto', 
+              display: 'block' 
+            }}
           />
         </Box>
+        <Box sx={{ flex: 1 }} />
         <Box 
           sx={{ 
             display: 'flex', 
-            gap: '40px',
+            gap: { xs: '20px', sm: '30px', md: '40px' },
             opacity: contentVisible ? 1 : 0,
             transform: contentVisible ? 'translateY(0)' : 'translateY(-10px)',
             transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
           }}
         >
-          {['HOME', 'PROJECTS', 'INFO', 'CONTACT'].map((item) => (
+          {['HOME', 'PROJECTS', 'CONTACT'].map((item) => (
             <Typography
               key={item}
               onClick={() => handleNavigation(item.toLowerCase())}
@@ -163,26 +207,32 @@ const Projects = () => {
       {/* Main Content Area */}
       <Box
         sx={{
-          width: '40vw',
+          width: { 
+            xs: '95vw', // Almost full width on mobile
+            sm: '80vw', // 80% width on small tablets
+            md: '60vw', // 60% width on medium screens
+            lg: '50vw', // 50% width on large screens
+            xl: '40vw'  // Original 40% width on extra large screens
+          },
           height: mainContentAnimated ? '100%' : '0px',
           overflow: 'hidden',
           transition: 'height 0.4s ease-out, padding 0.4s ease-out',
           display: 'flex',
-          marginTop: '20px',
-          paddingBottom: mainContentAnimated ? '60px' : '0px',
-          paddingLeft: mainContentAnimated ? '20px' : '0px'
+          marginTop: { xs: '10px', sm: '15px', md: '20px' },
+          paddingBottom: mainContentAnimated ? { xs: '40px', sm: '50px', md: '60px' } : '0px',
+          paddingLeft: mainContentAnimated ? { xs: '10px', sm: '15px', md: '20px' } : '0px'
         }}
       >
         <Box
           sx={{
-            backgroundColor: '#e74c3c',
+            backgroundColor: '#e04f28',
             width: '100%',
             height: '100%',
-            padding: '20px',
+            padding: { xs: '15px', sm: '18px', md: '20px' },
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
-            gap: '20px',
+            gap: { xs: '15px', sm: '18px', md: '20px' },
           }}
         >
           {/* Project Items */}
@@ -190,20 +240,32 @@ const Projects = () => {
             sx={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '8px',
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s',
             }}
           >
             <Typography
+              onMouseEnter={() => setHoveredProject('productive-clouds')}
+              onMouseLeave={() => setHoveredProject(null)}
+              onClick={() => navigate('/projects/productive-clouds')}
               sx={{
                 color: 'white',
-                fontSize: '36px',
+                fontSize: { 
+                  xs: '24px',
+                  sm: '28px', 
+                  md: '32px',
+                  lg: '36px'
+                },
                 fontWeight: 400,
-                letterSpacing: '2px',
+                letterSpacing: { xs: '1px', sm: '1.5px', md: '2px' },
                 textTransform: 'uppercase',
                 lineHeight: 1.2,
+                cursor: 'pointer',
+                transition: 'opacity 0.3s ease',
+                '&:hover': {
+                  opacity: 0.7,
+                },
               }}
             >
               PRODUCTIVE CLOUD SOLUTIONS
@@ -211,7 +273,7 @@ const Projects = () => {
             <Typography
               sx={{
                 color: 'white',
-                fontSize: '14px',
+                fontSize: { xs: '12px', sm: '13px', md: '14px' },
                 fontWeight: 300,
                 opacity: 0.9,
               }}
@@ -224,28 +286,40 @@ const Projects = () => {
             sx={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '8px',
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 0.8s ease-out 0.5s, transform 0.8s ease-out 0.5s',
             }}
           >
             <Typography
+              onMouseEnter={() => setHoveredProject('note')}
+              onMouseLeave={() => setHoveredProject(null)}
+              onClick={() => navigate('/projects/note')}
               sx={{
                 color: 'white',
-                fontSize: '36px',
+                fontSize: { 
+                  xs: '24px',
+                  sm: '28px', 
+                  md: '32px',
+                  lg: '36px'
+                },
                 fontWeight: 400,
-                letterSpacing: '2px',
+                letterSpacing: { xs: '1px', sm: '1.5px', md: '2px' },
                 textTransform: 'uppercase',
                 lineHeight: 1.2,
+                cursor: 'pointer',
+                transition: 'opacity 0.3s ease',
+                '&:hover': {
+                  opacity: 0.7,
+                },
               }}
             >
-              NOTE
+              NOTE.
             </Typography>
             <Typography
               sx={{
                 color: 'white',
-                fontSize: '14px',
+                fontSize: { xs: '12px', sm: '13px', md: '14px' },
                 fontWeight: 300,
                 opacity: 0.9,
               }}
@@ -258,20 +332,32 @@ const Projects = () => {
             sx={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '8px',
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 0.8s ease-out 0.7s, transform 0.8s ease-out 0.7s',
             }}
           >
             <Typography
+              onMouseEnter={() => setHoveredProject('elysian')}
+              onMouseLeave={() => setHoveredProject(null)}
+              onClick={() => navigate('/projects/elysian')}
               sx={{
                 color: 'white',
-                fontSize: '36px',
+                fontSize: { 
+                  xs: '24px',
+                  sm: '28px', 
+                  md: '32px',
+                  lg: '36px'
+                },
                 fontWeight: 400,
-                letterSpacing: '2px',
+                letterSpacing: { xs: '1px', sm: '1.5px', md: '2px' },
                 textTransform: 'uppercase',
                 lineHeight: 1.2,
+                cursor: 'pointer',
+                transition: 'opacity 0.3s ease',
+                '&:hover': {
+                  opacity: 0.7,
+                },
               }}
             >
               ELYSIAN CUSTOM COMPUTERS
@@ -279,7 +365,7 @@ const Projects = () => {
             <Typography
               sx={{
                 color: 'white',
-                fontSize: '14px',
+                fontSize: { xs: '12px', sm: '13px', md: '14px' },
                 fontWeight: 300,
                 opacity: 0.9,
               }}
@@ -292,20 +378,32 @@ const Projects = () => {
             sx={{ 
               display: 'flex', 
               flexDirection: 'column', 
-              gap: '8px',
               opacity: contentVisible ? 1 : 0,
               transform: contentVisible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 0.8s ease-out 0.9s, transform 0.8s ease-out 0.9s',
             }}
           >
             <Typography
+              onMouseEnter={() => setHoveredProject('superior-advantage')}
+              onMouseLeave={() => setHoveredProject(null)}
+              onClick={() => navigate('/projects/superior-advantage')}
               sx={{
                 color: 'white',
-                fontSize: '36px',
+                fontSize: { 
+                  xs: '24px',
+                  sm: '28px', 
+                  md: '32px',
+                  lg: '36px'
+                },
                 fontWeight: 400,
-                letterSpacing: '2px',
+                letterSpacing: { xs: '1px', sm: '1.5px', md: '2px' },
                 textTransform: 'uppercase',
                 lineHeight: 1.2,
+                cursor: 'pointer',
+                transition: 'opacity 0.3s ease',
+                '&:hover': {
+                  opacity: 0.7,
+                },
               }}
             >
               SUPERIOR ADVANTAGE REALTORS
@@ -313,7 +411,7 @@ const Projects = () => {
             <Typography
               sx={{
                 color: 'white',
-                fontSize: '14px',
+                fontSize: { xs: '12px', sm: '13px', md: '14px' },
                 fontWeight: 300,
                 opacity: 0.9,
               }}
@@ -323,6 +421,11 @@ const Projects = () => {
           </Box>
         </Box>
       </Box>
+
+      <ContactOverlay 
+        open={contactOverlayOpen}
+        onClose={handleCloseContactOverlay}
+      />
     </Box>
   )
 }
