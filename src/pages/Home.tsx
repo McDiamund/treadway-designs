@@ -5,26 +5,20 @@ import AnimatedBackground from '../components/AnimatedBackground'
 import ContactOverlay from '../components/ContactOverlay'
 import LoadingScreen from '../components/LoadingScreen'
 import { useNavigate } from 'react-router-dom'
+import { useImagePreloader } from '../utils/imagePreloader'
 
 const Home = () => {
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false)
   const [elementsHidden, setElementsHidden] = useState(false)
   const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
-  const [imagesLoaded, setImagesLoaded] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+
+  // Use comprehensive image preloader
+  const { isLoading: imagesLoading, animatedBackgroundImages } = useImagePreloader()
 
   const handleAnimationStart = useCallback(() => {
     setIsAnimationPlaying(true)
     setElementsHidden(true) // Hide elements permanently when animation starts
-  }, [])
-
-  const handleImagesLoaded = useCallback(() => {
-    setImagesLoaded(true)
-    // Add a small delay to ensure smooth transition from loading screen
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 500)
   }, [])
 
   const handleNavigation = useCallback((key: string) => {
@@ -34,7 +28,7 @@ const Home = () => {
         break;  
       case 'projects':
         // Only allow navigation if images are loaded
-        if (imagesLoaded) {
+        if (!imagesLoading) {
           handleAnimationStart()
         }
         break;
@@ -44,7 +38,7 @@ const Home = () => {
       default:
         break;
     }
-  }, [handleAnimationStart, imagesLoaded])
+  }, [handleAnimationStart, imagesLoading])
 
   const handleAnimationEnd = useCallback(() => {
     // Animation reached the last frame and stopped
@@ -460,10 +454,10 @@ const Home = () => {
         isPlaying={isAnimationPlaying}
         onAnimationStart={() => console.log('Animation started')}
         onAnimationEnd={handleAnimationEnd}
-        onImagesLoaded={handleImagesLoaded}
+        preloadedImages={animatedBackgroundImages}
       />
 
-      <LoadingScreen isVisible={isLoading} />
+      <LoadingScreen isVisible={imagesLoading} />
 
       <ContactOverlay 
         open={contactOverlayOpen}

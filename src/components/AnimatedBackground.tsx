@@ -6,13 +6,15 @@ interface AnimatedBackgroundProps {
   onAnimationStart?: () => void
   onAnimationEnd?: () => void
   onImagesLoaded?: () => void
+  preloadedImages?: string[]
 }
 
 const AnimatedBackground = ({ 
   isPlaying = false, 
   onAnimationStart, 
   onAnimationEnd,
-  onImagesLoaded
+  onImagesLoaded,
+  preloadedImages
 }: AnimatedBackgroundProps) => {
   const [currentFrame, setCurrentFrame] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -23,62 +25,71 @@ const AnimatedBackground = ({
   const imageCount = 20 // 0000.jpg to 0019.jpg
   const frameDuration = 1000 / 18 // 24fps = ~41.67ms per frame
 
-  // Preload all images more robustly
+  // Use preloaded images or load them dynamically
   useEffect(() => {
-    const loadImages = async () => {
-      const imagePaths: string[] = []
-      
-      try {
-        // First, get all image paths
-        for (let i = 0; i < imageCount; i++) {
-          const imageNumber = i.toString().padStart(4, '0')
-          try {
-            const imageModule = await import(`../assets/images/animated-background/${imageNumber}.jpg`)
-            imagePaths.push(imageModule.default)
-          } catch (error) {
-            console.error(`Error importing image ${imageNumber}.jpg:`, error)
+    if (preloadedImages && preloadedImages.length > 0) {
+      // Use preloaded images
+      setImages(preloadedImages)
+      setIsLoaded(true)
+      console.log('Using preloaded animated background images')
+      onImagesLoaded?.()
+    } else {
+      // Fallback to dynamic loading
+      const loadImages = async () => {
+        const imagePaths: string[] = []
+        
+        try {
+          // First, get all image paths
+          for (let i = 0; i < imageCount; i++) {
+            const imageNumber = i.toString().padStart(4, '0')
+            try {
+              const imageModule = await import(`../assets/images/animated-background/${imageNumber}.jpg`)
+              imagePaths.push(imageModule.default)
+            } catch (error) {
+              console.error(`Error importing image ${imageNumber}.jpg:`, error)
+            }
           }
-        }
 
-        // Then preload all images and ensure they're in browser cache
-        const loadPromises = imagePaths.map((imagePath, index) => {
-          return new Promise<void>((resolve, reject) => {
-            const img = new Image()
-            
-            img.onload = () => {
-              console.log(`Image ${index} loaded successfully`)
-              resolve()
-            }
-            
-            img.onerror = (error) => {
-              console.error(`Error loading image ${index}:`, error)
-              reject(error)
-            }
-            
-            // Important: Set src after setting up event listeners
-            img.src = imagePath
+          // Then preload all images and ensure they're in browser cache
+          const loadPromises = imagePaths.map((imagePath, index) => {
+            return new Promise<void>((resolve, reject) => {
+              const img = new Image()
+              
+              img.onload = () => {
+                console.log(`Image ${index} loaded successfully`)
+                resolve()
+              }
+              
+              img.onerror = (error) => {
+                console.error(`Error loading image ${index}:`, error)
+                reject(error)
+              }
+              
+              // Important: Set src after setting up event listeners
+              img.src = imagePath
+            })
           })
-        })
 
-        await Promise.all(loadPromises)
-        
-        setImages(imagePaths)
-        setIsLoaded(true)
-        
-        console.log('All images successfully preloaded')
-        onImagesLoaded?.()
-        
-      } catch (error) {
-        console.error('Error in image loading process:', error)
-        // Even if some images fail, we'll try to proceed
-        setImages(imagePaths)
-        setIsLoaded(true)
-        onImagesLoaded?.()
+          await Promise.all(loadPromises)
+          
+          setImages(imagePaths)
+          setIsLoaded(true)
+          
+          console.log('All images successfully preloaded')
+          onImagesLoaded?.()
+          
+        } catch (error) {
+          console.error('Error in image loading process:', error)
+          // Even if some images fail, we'll try to proceed
+          setImages(imagePaths)
+          setIsLoaded(true)
+          onImagesLoaded?.()
+        }
       }
-    }
 
-    loadImages()
-  }, [imageCount, onImagesLoaded])
+      loadImages()
+    }
+  }, [imageCount, onImagesLoaded, preloadedImages])
 
   // Animation logic
   useEffect(() => {

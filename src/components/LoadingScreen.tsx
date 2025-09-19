@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, CircularProgress } from '@mui/material'
 import { memo } from 'react'
 
 interface LoadingScreenProps {
@@ -34,37 +34,14 @@ const LoadingScreen = ({ isVisible }: LoadingScreenProps) => {
           gap: '2rem',
         }}
       >
-        {/* Loading dots animation */}
-        <Box
+        {/* Loading spinner */}
+        <CircularProgress
+          size={50}
+          thickness={3}
           sx={{
-            width: '220px',
-            height: '5px',
-            backgroundColor: '#e0e0e0',
-            borderRadius: '5px',
-            overflow: 'hidden',
-            position: 'relative',
+            color: '#a4b649',
           }}
-        >
-         <Box
-           sx={{
-             height: '100%',
-             backgroundColor: '#a4b649',
-             borderRadius: '5px',
-             position: 'absolute',
-             left: 0,
-             top: 0,
-             animation: 'loadingBarFill 0.7s ease-in-out infinite',
-             '@keyframes loadingBarFill': {
-               '0%': {
-                 width: '0%',
-               },
-               '100%': {
-                 width: '100%',
-               },
-             },
-           }}
-         />
-        </Box>
+        />
         
         <Typography
           sx={{

@@ -2,11 +2,7 @@ import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState, useCallback } from 'react'
 import ContactOverlay from '../components/ContactOverlay'
-import slogo from '../assets/images/slogo-transparent-white.png'
-import elysianImg from '../assets/images/elysian.png'
-import productivecloudsImg from '../assets/images/productiveclouds.png'
-import superioradvantagereImg from '../assets/images/superioradvantage-re.co_.png'
-import noteImg from '../assets/images/note.jpg'
+import { useImagePreloader } from '../utils/imagePreloader'
 
 const Projects = () => {
   const navigate = useNavigate()
@@ -18,37 +14,36 @@ const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null)
   const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
 
-  // Project image mapping
-  const projectImages = {
-    'productive-clouds': productivecloudsImg,
-    'note': noteImg,
-    'elysian': elysianImg,
-    'superior-advantage': superioradvantagereImg,
+  // Use comprehensive image preloader
+  const { projectImages, animatedBackgroundImages } = useImagePreloader()
+
+  // Project image mapping using preloaded images
+  const projectImageMap = {
+    'productive-clouds': projectImages.productiveclouds || '',
+    'note': projectImages.note || '',
+    'elysian': projectImages.elysian || '',
+    'superior-advantage': projectImages.superioradvantage || '',
   }
 
-  // Load the final frame image (0019.jpg) as default
+  // Set the final frame image (0019.jpg) as default from preloaded images
   useEffect(() => {
-    const loadBackgroundImage = async () => {
-      try {
-        const imageModule = await import('../assets/images/animated-background/0019.jpg')
-        setDefaultBackgroundImage(imageModule.default)
-        setBackgroundImage(imageModule.default)
-      } catch (error) {
-        console.error('Error loading background image:', error)
+    if (animatedBackgroundImages.length > 0) {
+      const finalFrameImage = animatedBackgroundImages[19] // Last frame (0019.jpg)
+      if (finalFrameImage) {
+        setDefaultBackgroundImage(finalFrameImage)
+        setBackgroundImage(finalFrameImage)
       }
     }
-
-    loadBackgroundImage()
-  }, [])
+  }, [animatedBackgroundImages])
 
   // Handle hover background changes
   useEffect(() => {
-    if (hoveredProject && projectImages[hoveredProject as keyof typeof projectImages]) {
-      setBackgroundImage(projectImages[hoveredProject as keyof typeof projectImages])
+    if (hoveredProject && projectImageMap[hoveredProject as keyof typeof projectImageMap]) {
+      setBackgroundImage(projectImageMap[hoveredProject as keyof typeof projectImageMap])
     } else {
       setBackgroundImage(defaultBackgroundImage)
     }
-  }, [hoveredProject, defaultBackgroundImage])
+  }, [hoveredProject, projectImageMap, defaultBackgroundImage])
 
   // Trigger header animation on page load
   useEffect(() => {
@@ -163,7 +158,7 @@ const Projects = () => {
           >
           <Box
             component="img"
-            src={slogo}
+            src={projectImages.slogo || ''}
             alt="Logo"
             sx={{ 
               height: { xs: 32, sm: 36, md: 40 }, 

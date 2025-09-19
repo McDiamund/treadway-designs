@@ -2,18 +2,7 @@ import { Box, Typography, Button } from '@mui/material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ContactOverlay from '../components/ContactOverlay'
-import slogo from '../assets/images/slogo-transparent-white.png'
-import elysianImg from '../assets/images/elysian.png'
-import blackresearcherImg from '../assets/images/blackresearcher.com_.png'
-import blackeverythingImg from '../assets/images/blackeverything.com_.png'
-import productivecloudsImg from '../assets/images/productiveclouds.png'
-import superioradvantagereImg from '../assets/images/superioradvantage-re.co_.png'
-import superioradvantagereImg2 from '../assets/images/superioradvantage2.png'
-import superioradvantagereImg3 from '../assets/images/superioradvantage3.png'
-import backgroundImg from '../assets/images/animated-background/0019.jpg'
-import elysian1 from '../assets/images/elysian1.png'
-import elysian2 from '../assets/images/elysian2.png'
-import noteImg from '../assets/images/note.jpg'
+import { useImagePreloader } from '../utils/imagePreloader'
 
 interface ProjectData {
   title: string
@@ -32,14 +21,17 @@ const ProjectDetail = () => {
   const [contentVisible, setContentVisible] = useState<boolean>(false)
   const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
 
-  // Project data mapping
+  // Use comprehensive image preloader
+  const { projectImages, animatedBackgroundImages } = useImagePreloader()
+
+  // Project data mapping using preloaded images
   const projectData: Record<string, ProjectData> = {
     'productive-clouds': {
       title: 'PRODUCTIVE CLOUD SOLUTIONS',
       description: 'We specialize in creating practical, scalable solutions that solve real business challenges, helping clients establish their digital presence with modern web applications and mobile experiences.',
       technologies: ['React', 'Django', 'Flutter', 'MUI', 'Bootstrap', 'TypeScript', 'Node.js', 'AWS Serverless'],
       details: 'As Lead Frontend Engineer at this innovative consulting firm, I drive the technical vision for web and mobile applications that transform business ideas into digital reality. I oversee the complete project lifecycle—from initial setup and architecture decisions to task delegation and production deployment.',
-      images: [blackresearcherImg, blackeverythingImg, productivecloudsImg],
+      images: [projectImages.blackresearcher || '', projectImages.blackeverything || '', projectImages.productiveclouds || ''],
       website: 'https://productiveclouds.com'
     },
     'note': {
@@ -47,7 +39,7 @@ const ProjectDetail = () => {
       description: 'A location discovery and sharing platform that solves the universal problem of finding great places to visit in any city. Users can save favorite spots—from hidden restaurants to must-see vacation destinations—and share curated collections with friends and the community.',
       technologies: ['Flutter', 'Dart', 'AWS Serverless', 'Figma', 'MongoDB'],
       details: 'Note. is a social platform that combines personal organization with community-driven discovery, giving users both a private bookmark system and access to curated recommendations from real people.',
-      images: [noteImg, noteImg, noteImg],
+      images: [projectImages.note || '', projectImages.note || '', projectImages.note || ''],
       website: 'https://note-app.com'
     },
     'elysian': {
@@ -55,7 +47,7 @@ const ProjectDetail = () => {
       description: 'A bespoke computer building service platform featuring custom PC configurations, expert consultation, and premium components.',
       technologies: ['Next.js', 'TypeScript', 'Express.js', 'MySQL', 'Figma'],
       details: 'Elysian Custom Computers is a full-stack e-commerce platform that allows customers to configure custom PC builds, view detailed component specifications, and receive expert recommendations. The platform includes inventory management, order tracking, and customer support systems. This site transformed a word-of-mouth business into a professional online presence, enabling the client to showcase their expertise in custom computer building and reach a broader local market.',
-      images: [elysian1, elysian2, elysianImg],
+      images: [projectImages.elysian1 || '', projectImages.elysian2 || '', projectImages.elysian || ''],
       website: 'https://elysiancustomcomputers.com'
     },
     'superior-advantage': {
@@ -63,7 +55,7 @@ const ProjectDetail = () => {
       description: 'A modern real estate platform connecting buyers, sellers, and agents with advanced search capabilities and market insights.',
       technologies: ['React', 'TypeScript', 'CSS3', 'Figma'],
       details: 'Enhanced their ability to attract new clients while providing existing customers with easier access to valuable real estate information and services.',
-      images: [superioradvantagereImg2, superioradvantagereImg3, superioradvantagereImg],
+      images: [projectImages.superioradvantage2 || '', projectImages.superioradvantage3 || '', projectImages.superioradvantage || ''],
       website: 'https://superioradvantage-re.co'
     }
   }
@@ -154,7 +146,7 @@ const ProjectDetail = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${backgroundImg})`,
+          backgroundImage: animatedBackgroundImages.length > 0 ? `url(${animatedBackgroundImages[19]})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -188,7 +180,7 @@ const ProjectDetail = () => {
           style={{ cursor: 'pointer' }}
           >
           <img
-            src={slogo}
+            src={projectImages.slogo || ''}
             alt="Logo"
             style={{ 
               height: 'clamp(32px, 5vw, 40px)', 
