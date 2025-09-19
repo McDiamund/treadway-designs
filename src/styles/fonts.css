@@ -1,0 +1,7 @@
+@font-face {
+    font-family: 'Jost';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('../assets/fonts/jost/Jost-Regular.ttf') format('truetype');
+}
