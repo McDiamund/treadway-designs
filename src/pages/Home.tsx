@@ -447,6 +447,7 @@ const Home = () => {
         isPlaying={isAnimationPlaying}
         onAnimationStart={() => console.log('Animation started')}
         onAnimationEnd={handleAnimationEnd}
+        onImagesLoaded={() => console.log('Animation frames preloaded')}
       />
 
 
