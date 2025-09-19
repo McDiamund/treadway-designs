@@ -2,33 +2,41 @@
     margin: 0;
     padding: 0;
     min-width: 0;
-    cursor: none !important; /* Hide default cursor */
 }
 
-/* Ensure all interactive elements hide default cursor */
-a, button, input, textarea, select, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]) {
-    cursor: none !important;
+/* Hide default cursor only on devices with precise pointers (not touch devices) */
+@media (hover: hover) and (pointer: fine) {
+    * {
+        cursor: none !important; /* Hide default cursor */
+    }
+
+    /* Ensure all interactive elements hide default cursor */
+    a, button, input, textarea, select, [role="button"], [onclick], [tabindex]:not([tabindex="-1"]) {
+        cursor: none !important;
+    }
+
+    /* Hide cursor on hover states */
+    *:hover {
+        cursor: none !important;
+    }
 }
 
-/* Hide cursor on hover states */
-*:hover {
-    cursor: none !important;
-}
+/* Custom cursor styles - only for non-touch devices */
+@media (hover: hover) and (pointer: fine) {
+    .custom-cursor {
+        position: fixed;
+        width: 30px;
+        height: 30px;
+        background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: transform 0.1s ease-out;
+    }
 
-/* Custom cursor styles */
-.custom-cursor {
-    position: fixed;
-    width: 30px;
-    height: 30px;
-    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent black */
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.1s ease-out;
-}
-
-.custom-cursor.hover {
-    transform: translate(-50%, -50%) scale(1.5);
-    background-color: rgba(80, 80, 80, 0.7); /* Slightly lighter when hovering */
+    .custom-cursor.hover {
+        transform: translate(-50%, -50%) scale(1.5);
+        background-color: rgba(80, 80, 80, 0.7); /* Slightly lighter when hovering */
+    }
 }

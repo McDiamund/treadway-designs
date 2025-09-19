@@ -8,8 +8,20 @@ interface CursorPosition {
 const CustomCursor = () => {
   const [cursorPosition, setCursorPosition] = useState<CursorPosition>({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
+    // Check if device supports touch
+    const checkTouchDevice = () => {
+      return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    };
+    
+    setIsTouchDevice(checkTouchDevice());
+    
+    // If it's a touch device, don't set up mouse event listeners
+    if (checkTouchDevice()) {
+      return;
+    }
     const handleMouseMove = (e: MouseEvent) => {
       setCursorPosition({ x: e.clientX, y: e.clientY });
     };
@@ -38,6 +50,11 @@ const CustomCursor = () => {
       document.removeEventListener('mouseleave', handleMouseLeave, true);
     };
   }, []);
+
+  // Don't render custom cursor on touch devices
+  if (isTouchDevice) {
+    return null;
+  }
 
   return (
     <div

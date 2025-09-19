@@ -147,8 +147,9 @@ const ProjectDetail = () => {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        height: '100dvh',
-        overflow: 'hidden',
+        height: { xs: 'auto', lg: '100dvh' },
+        minHeight: { xs: '100dvh', lg: 'auto' },
+        overflow: { xs: 'visible', lg: 'hidden' },
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -233,8 +234,8 @@ const ProjectDetail = () => {
       {/* Main Content Area */}
       <Box
         sx={{
-          height: mainContentAnimated ? '100%' : '0px',
-          overflow: 'hidden',
+          height: mainContentAnimated ? { xs: 'auto', lg: '100%' } : '0px',
+          overflow: { xs: 'visible', lg: 'hidden' },
           transition: 'height 0.4s ease-out, padding 0.4s ease-out',
           display: 'flex',
           flexDirection: { xs: 'column', lg: 'row' },
