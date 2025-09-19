@@ -2,7 +2,13 @@ import { Box, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState, useCallback } from 'react'
 import ContactOverlay from '../components/ContactOverlay'
-import { useImagePreloader } from '../utils/imagePreloader'
+// Direct image imports
+import slogoImage from '../assets/images/slogo-transparent-white.png'
+import productiveCloudsImage from '../assets/images/productiveclouds.png'
+import noteImage from '../assets/images/note.jpg'
+import elysianImage from '../assets/images/elysian.png'
+import superiorAdvantageImage from '../assets/images/superioradvantage-re.co_.png'
+import backgroundImage0019 from '../assets/images/animated-background/0019.jpg'
 
 const Projects = () => {
   const navigate = useNavigate()
@@ -14,27 +20,19 @@ const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<string | null>(null)
   const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
 
-  // Use comprehensive image preloader
-  const { projectImages, animatedBackgroundImages } = useImagePreloader()
-
-  // Project image mapping using preloaded images
+  // Project image mapping using direct imports
   const projectImageMap = {
-    'productive-clouds': projectImages.productiveclouds || '',
-    'note': projectImages.note || '',
-    'elysian': projectImages.elysian || '',
-    'superior-advantage': projectImages.superioradvantage || '',
+    'productive-clouds': productiveCloudsImage,
+    'note': noteImage,
+    'elysian': elysianImage,
+    'superior-advantage': superiorAdvantageImage,
   }
 
-  // Set the final frame image (0019.jpg) as default from preloaded images
+  // Set the final frame image (0019.jpg) as default
   useEffect(() => {
-    if (animatedBackgroundImages.length > 0) {
-      const finalFrameImage = animatedBackgroundImages[19] // Last frame (0019.jpg)
-      if (finalFrameImage) {
-        setDefaultBackgroundImage(finalFrameImage)
-        setBackgroundImage(finalFrameImage)
-      }
-    }
-  }, [animatedBackgroundImages])
+    setDefaultBackgroundImage(backgroundImage0019)
+    setBackgroundImage(backgroundImage0019)
+  }, [])
 
   // Handle hover background changes
   useEffect(() => {
@@ -158,7 +156,7 @@ const Projects = () => {
           >
           <Box
             component="img"
-            src={projectImages.slogo || ''}
+            src={slogoImage}
             alt="Logo"
             sx={{ 
               height: { xs: 32, sm: 36, md: 40 }, 

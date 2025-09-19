@@ -3,9 +3,7 @@ import { GitHub, LinkedIn, Description } from '@mui/icons-material'
 import { useState, useCallback } from 'react'
 import AnimatedBackground from '../components/AnimatedBackground'
 import ContactOverlay from '../components/ContactOverlay'
-import LoadingScreen from '../components/LoadingScreen'
 import { useNavigate } from 'react-router-dom'
-import { useImagePreloader } from '../utils/imagePreloader'
 
 const Home = () => {
   const [isAnimationPlaying, setIsAnimationPlaying] = useState(false)
@@ -13,8 +11,6 @@ const Home = () => {
   const [contactOverlayOpen, setContactOverlayOpen] = useState(false)
   const navigate = useNavigate()
 
-  // Use comprehensive image preloader
-  const { isLoading: imagesLoading, animatedBackgroundImages } = useImagePreloader()
 
   const handleAnimationStart = useCallback(() => {
     setIsAnimationPlaying(true)
@@ -27,10 +23,7 @@ const Home = () => {
         window.location.reload()
         break;  
       case 'projects':
-        // Only allow navigation if images are loaded
-        if (!imagesLoading) {
-          handleAnimationStart()
-        }
+        handleAnimationStart()
         break;
       case 'contact':
         setContactOverlayOpen(true)
@@ -38,7 +31,7 @@ const Home = () => {
       default:
         break;
     }
-  }, [handleAnimationStart, imagesLoading])
+  }, [handleAnimationStart])
 
   const handleAnimationEnd = useCallback(() => {
     // Animation reached the last frame and stopped
@@ -454,10 +447,8 @@ const Home = () => {
         isPlaying={isAnimationPlaying}
         onAnimationStart={() => console.log('Animation started')}
         onAnimationEnd={handleAnimationEnd}
-        preloadedImages={animatedBackgroundImages}
       />
 
-      <LoadingScreen isVisible={imagesLoading} />
 
       <ContactOverlay 
         open={contactOverlayOpen}
